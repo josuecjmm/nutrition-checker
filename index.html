@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meat Nutrition Table</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9f9; /* Light background for contrast */
+        }
+        .container {
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            color: #28a745; /* Green color for the heading */
+        }
+        .table {
+            background-color: #e9f7ef; /* Light green background for the table */
+        }
+        .table th {
+            background-color: #d4edda; /* Light green for table headers */
+            color: #155724; /* Dark green text for headers */
+        }
+        .table td {
+            color: #333; /* Dark text for table cells */
+        }
+        .btn-primary {
+            background-color: #28a745; /* Green button */
+            border-color: #28a745; /* Green border for button */
+        }
+        .btn-primary:hover {
+            background-color: #218838; /* Darker green on hover */
+            border-color: #1e7e34; /* Darker border on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <h1 class="mb-4">Tabla de nutrición proteica</h1>
+        <div class="input-group mb-3">
+            <div class="form-group">
+                <label>Introduzca los gramos de proteína</label>
+                <input min="1" type="number" class="form-control" id="gramsInput" placeholder="100g">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Carne</th>
+                        <th>Proteína (g)</th>
+                        <th>Calorías</th>
+                        <th>Total Proteinas (g)</th>
+                        <th>Total Calorias</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="meatTableBody">
+                    <!-- Rows will be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const latinAmericanMeats = {
+            chickenBreast: {
+                proteinPerGram: 0.31,
+                caloriesPerGram: 0.165,
+                translate: "Pechuga de pollo"
+            },
+            chickenThigh: {
+                proteinPerGram: 0.20,
+                caloriesPerGram: 0.130,
+                translate: "Muslo de pollo"
+            },
+            leanBeef: {
+                proteinPerGram: 0.21,
+                caloriesPerGram: 0.250,
+                translate: "Carne de res (magra)"
+            },
+            groundBeef: {
+                proteinPerGram: 0.18,
+                caloriesPerGram: 0.132,
+                translate: "Carne molida de res"
+            },
+            tunaInWater: {
+                proteinPerGram: 0.24,
+                caloriesPerGram: 0.158,
+                translate: "Atún (en agua)"
+            },
+            leanPork: {
+                proteinPerGram: 0.20,
+                caloriesPerGram: 0.146,
+                translate: "Cerdo (magro)"
+            }
+        };
+
+        function populateTable() {
+            const tableBody = document.getElementById('meatTableBody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            for (const [key, meat] of Object.entries(latinAmericanMeats)) {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${meat.translate}</td>
+                    <td>${meat.proteinPerGram.toFixed(2)}</td>
+                    <td>${meat.caloriesPerGram.toFixed(3)}</td>
+                    <td></td>
+                    <td></td>
+                    <td><button class="btn btn-primary btn-sm" onclick="copyToClipboard(this)">Copiar</button></td>
+                `;
+
+                tableBody.appendChild(row);
+            }
+        }
+
+        function calculateTotals() {
+            const grams = parseFloat(document.getElementById('gramsInput').value);
+            const rows = document.querySelectorAll('#meatTableBody tr');
+
+            rows.forEach((row, index) => {
+                const meat = Object.values(latinAmericanMeats)[index];
+                const totalProtein = (meat.proteinPerGram * grams).toFixed(2);
+                const totalCalories = (meat.caloriesPerGram * (grams * 10)).toFixed(2); // Corrected calculation
+
+                row.cells[3].innerText = totalProtein; // Total Protein cell
+                row.cells[4].innerText = totalCalories; // Total Calories cell
+            });
+        }
+
+        function copyToClipboard(button) {
+            const row = button.closest('tr');
+            const totalProtein = row.cells[3].innerText; // Total Protein
+            const totalCalories = row.cells[4].innerText; // Total Calories
+
+            const textToCopy = `Proteína total: ${totalProtein} g, Calorías totales: ${totalCalories} kcal`;
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    alert('Copied to clipboard: ' + textToCopy);
+                })
+                .catch(err => {
+                    console.error('Error copying text: ', err);
+                });
+        }
+
+        document.getElementById('gramsInput').addEventListener('input', calculateTotals);
+
+        // Populate the table on page load
+        populateTable();
+    </script>
+</body>
+</html>
